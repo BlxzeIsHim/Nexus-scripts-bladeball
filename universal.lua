@@ -1,239 +1,226 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local p=game:GetService("Players")
+local r=game:GetService("RunService")
+local u=game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local pl=p.LocalPlayer
+local ch=pl.Character or pl.CharacterAdded:Wait()
+local h=ch:WaitForChild("Humanoid")
+local rp=ch:WaitForChild("HumanoidRootPart")
 
-local noclip = false
-local flying = false
-local flySpeed = 250
+local n=false
+local f=false
+local fs=250
 
--- Create GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player:WaitForChild("PlayerGui")
+local sg=Instance.new("ScreenGui")
+sg.Parent=pl:WaitForChild("PlayerGui")
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 150)
-frame.Position = UDim2.new(0.5, -100, 0.5, -75)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Changed background color
-frame.Active = true
-frame.Draggable = true
-frame.Visible = true -- Ensure visibility
-frame.Parent = screenGui
+local fr=Instance.new("Frame")
+fr.Size=UDim2.new(0,200,0,150)
+fr.Position=UDim2.new(0.5,-100,0.5,-75)
+fr.BackgroundColor3=Color3.fromRGB(30,30,30)
+fr.Active=true
+fr.Draggable=true
+fr.Visible=true
+fr.Parent=sg
 
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(48, 25, 52)), -- Dark Purple
-    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(25, 25, 112)), -- Dark Blue
-    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(139, 0, 0)) -- Dark Red
+local g=Instance.new("UIGradient")
+g.Color=ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00,Color3.fromRGB(48,25,52)),
+    ColorSequenceKeypoint.new(0.50,Color3.fromRGB(25,25,112)),
+    ColorSequenceKeypoint.new(1.00,Color3.fromRGB(139,0,0))
 }
-gradient.Parent = frame
+g.Parent=fr
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 20)
-titleLabel.Position = UDim2.new(0, 0, 0, 0)
-titleLabel.Text = "Nexus Scripts"
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Changed background color
-titleLabel.Font = Enum.Font.GothamSemibold -- Changed font
-titleLabel.TextSize = 14 -- Changed text size
-titleLabel.Parent = frame
+local tl=Instance.new("TextLabel")
+tl.Size=UDim2.new(1,0,0,20)
+tl.Position=UDim2.new(0,0,0,0)
+tl.Text="Nexus Scripts"
+tl.TextColor3=Color3.new(1,1,1)
+tl.BackgroundColor3=Color3.fromRGB(50,50,50)
+tl.Font=Enum.Font.GothamSemibold
+tl.TextSize=14
+tl.Parent=fr
 
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 20, 0, 20)
-closeButton.Position = UDim2.new(1, -25, 0, 5)
-closeButton.Text = "-"
-closeButton.TextColor3 = Color3.new(1, 1, 1)
-closeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Changed background color
-closeButton.Font = Enum.Font.Gotham -- Changed font
-closeButton.TextSize = 14 -- Changed text size
-closeButton.Parent = frame
+local cb=Instance.new("TextButton")
+cb.Size=UDim2.new(0,20,0,20)
+cb.Position=UDim2.new(1,-25,0,5)
+cb.Text="-"
+cb.TextColor3=Color3.new(1,1,1)
+cb.BackgroundColor3=Color3.fromRGB(50,50,50)
+cb.Font=Enum.Font.Gotham
+cb.TextSize=14
+cb.Parent=fr
 
-local enableFlyButton = Instance.new("TextButton")
-enableFlyButton.Size = UDim2.new(0, 180, 0, 30)
-enableFlyButton.Position = UDim2.new(0, 10, 0, 30)
-enableFlyButton.Text = "Enable Fly"
-enableFlyButton.TextColor3 = Color3.new(1, 1, 1)
-enableFlyButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Changed background color
-enableFlyButton.Font = Enum.Font.Gotham -- Changed font
-enableFlyButton.TextSize = 14 -- Changed text size
-enableFlyButton.Parent = frame
+local efb=Instance.new("TextButton")
+efb.Size=UDim2.new(0,180,0,30)
+efb.Position=UDim2.new(0,10,0,30)
+efb.Text="Enable Fly"
+efb.TextColor3=Color3.new(1,1,1)
+efb.BackgroundColor3=Color3.fromRGB(60,60,60)
+efb.Font=Enum.Font.Gotham
+efb.TextSize=14
+efb.Parent=fr
 
-local enableNoclipButton = Instance.new("TextButton")
-enableNoclipButton.Size = UDim2.new(0, 180, 0, 30)
-enableNoclipButton.Position = UDim2.new(0, 10, 0, 70)
-enableNoclipButton.Text = "Enable Noclip"
-enableNoclipButton.TextColor3 = Color3.new(1, 1, 1)
-enableNoclipButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Changed background color
-enableNoclipButton.Font = Enum.Font.Gotham -- Changed font
-enableNoclipButton.TextSize = 14 -- Changed text size
-enableNoclipButton.Parent = frame
+local enb=Instance.new("TextButton")
+enb.Size=UDim2.new(0,180,0,30)
+enb.Position=UDim2.new(0,10,0,70)
+enb.Text="Enable Noclip"
+enb.TextColor3=Color3.new(1,1,1)
+enb.BackgroundColor3=Color3.fromRGB(60,60,60)
+enb.Font=Enum.Font.Gotham
+enb.TextSize=14
+enb.Parent=fr
 
-local flySpeedTextBox = Instance.new("TextBox")
-flySpeedTextBox.Size = UDim2.new(0, 180, 0, 30)
-flySpeedTextBox.Position = UDim2.new(0, 10, 0, 110)
-flySpeedTextBox.PlaceholderText = "Fly Speed"
-flySpeedTextBox.Text = tostring(flySpeed)
-flySpeedTextBox.TextColor3 = Color3.new(1, 1, 1)
-flySpeedTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Changed background color
-flySpeedTextBox.Font = Enum.Font.Gotham -- Changed font
-flySpeedTextBox.TextSize = 14 -- Changed text size
-flySpeedTextBox.Parent = frame
+local fst=Instance.new("TextBox")
+fst.Size=UDim2.new(0,180,0,30)
+fst.Position=UDim2.new(0,10,0,110)
+fst.PlaceholderText="Fly Speed"
+fst.Text=tostring(fs)
+fst.TextColor3=Color3.new(1,1,1)
+fst.BackgroundColor3=Color3.fromRGB(60,60,60)
+fst.Font=Enum.Font.Gotham
+fst.TextSize=14
+fst.Parent=fr
 
-local function toggleNoclip()
-    noclip = not noclip
-    if noclip then
-        enableNoclipButton.Text = "Disable Noclip"
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
+local function tn()
+    n=not n
+    if n then
+        enb.Text="Disable Noclip"
+        for _,part in pairs(ch:GetDescendants())do
+            if part:IsA("BasePart")and part.CanCollide then
+                part.CanCollide=false
             end
         end
     else
-        enableNoclipButton.Text = "Enable Noclip"
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-    end
-end
-
-local function toggleFly()
-    flying = not flying
-    if flying then
-        enableFlyButton.Text = "Disable Fly"
-        humanoid.PlatformStand = true
-    else
-        enableFlyButton.Text = "Enable Fly"
-        humanoid.PlatformStand = false
-        humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-    end
-end
-
-local function onStepped()
-    if noclip then
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
+        enb.Text="Enable Noclip"
+        for _,part in pairs(ch:GetDescendants())do
+            if part:IsA("BasePart")then
+                part.CanCollide=true
             end
         end
     end
 end
 
-local function onRenderStep()
-    if flying then
-        local moveDirection = Vector3.new()
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            moveDirection = moveDirection + (workspace.CurrentCamera.CFrame.LookVector * flySpeed)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            moveDirection = moveDirection - (workspace.CurrentCamera.CFrame.LookVector * flySpeed)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            moveDirection = moveDirection - (workspace.CurrentCamera.CFrame.RightVector * flySpeed)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            moveDirection = moveDirection + (workspace.CurrentCamera.CFrame.RightVector * flySpeed)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            moveDirection = moveDirection + (Vector3.new(0, flySpeed, 0))
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            moveDirection = moveDirection - (Vector3.new(0, flySpeed, 0))
-        end
-
-        humanoidRootPart.Velocity = moveDirection
-    end
-end
-
-local function toggleGuiVisibility()
-    frame.Visible = not frame.Visible
-end
-
-local function updateFlySpeed()
-    local newSpeed = tonumber(flySpeedTextBox.Text)
-    if newSpeed then
-        flySpeed = newSpeed
+local function tf()
+    f=not f
+    if f then
+        efb.Text="Disable Fly"
+        h.PlatformStand=true
     else
-        flySpeedTextBox.Text = tostring(flySpeed)
+        efb.Text="Enable Fly"
+        rp.Velocity=Vector3.new(0,0,0)
+        h.PlatformStand=false
     end
 end
 
-local function addButtonHoverEffect(button)
-    button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- Darker color on hover
+local function os()
+    if n then
+        for _,part in pairs(ch:GetDescendants())do
+            if part:IsA("BasePart")and part.CanCollide then
+                part.CanCollide=false
+            end
+        end
+    end
+end
+
+local function ors()
+    if f then
+        local md=Vector3.new()
+        if u:IsKeyDown(Enum.KeyCode.W)then
+            md=md+(workspace.CurrentCamera.CFrame.LookVector*fs)
+        end
+        if u:IsKeyDown(Enum.KeyCode.S)then
+            md=md-(workspace.CurrentCamera.CFrame.LookVector*fs)
+        end
+        if u:IsKeyDown(Enum.KeyCode.A)then
+            md=md-(workspace.CurrentCamera.CFrame.RightVector*fs)
+        end
+        if u:IsKeyDown(Enum.KeyCode.D)then
+            md=md+(workspace.CurrentCamera.CFrame.RightVector*fs)
+        end
+        if u:IsKeyDown(Enum.KeyCode.Space)then
+                        md=md+(Vector3.new(0,fs,0))
+        end
+        if u:IsKeyDown(Enum.KeyCode.LeftControl)then
+            md=md-(Vector3.new(0,fs,0))
+        end
+        rp.Velocity=md
+    end
+end
+
+local function tg()
+    fr.Visible=not fr.Visible
+end
+
+local function uf()
+    local ns=tonumber(fst.Text)
+    if ns then
+        fs=ns
+    else
+        fst.Text=tostring(fs)
+    end
+end
+
+local function abhe(b)
+    b.MouseEnter:Connect(function()
+        b.BackgroundColor3=Color3.fromRGB(70,70,70)
     end)
-    button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Revert to original color on leave
+    b.MouseLeave:Connect(function()
+        b.BackgroundColor3=Color3.fromRGB(60,60,60)
     end)
 end
 
-addButtonHoverEffect(enableFlyButton)
-addButtonHoverEffect(enableNoclipButton)
-addButtonHoverEffect(closeButton)
+abhe(efb)
+abhe(enb)
+abhe(cb)
 
--- Add hover effect for text box
-flySpeedTextBox.MouseEnter:Connect(function()
-    flySpeedTextBox.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- Darker color on hover
+fst.MouseEnter:Connect(function()
+    fst.BackgroundColor3=Color3.fromRGB(70,70,70)
 end)
-flySpeedTextBox.MouseLeave:Connect(function()
-    flySpeedTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- Revert to original color on leave
+fst.MouseLeave:Connect(function()
+    fst.BackgroundColor3=Color3.fromRGB(60,60,60)
 end)
 
-enableNoclipButton.MouseButton1Click:Connect(toggleNoclip)
-enableFlyButton.MouseButton1Click:Connect(toggleFly)
-flySpeedTextBox.FocusLost:Connect(updateFlySpeed)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.Insert then
-        toggleGuiVisibility()
+enb.MouseButton1Click:Connect(tn)
+efb.MouseButton1Click:Connect(tf)
+fst.FocusLost:Connect(uf)
+
+u.InputBegan:Connect(function(input,gp)
+    if gp then return end
+    if input.KeyCode==Enum.KeyCode.Insert then
+        tg()
     end
 end)
-RunService.Stepped:Connect(onStepped)
-RunService.RenderStepped:Connect(onRenderStep)
 
--- Make frame draggable
-local dragging
-local dragInput
-local dragStart
-local startPos
+r.Stepped:Connect(os)
+r.RenderStepped:Connect(ors)
 
-local function update(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-
+fr.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 then
+        dragging=true
+        dragStart=input.Position
+        startPos=fr.Position
         input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
+            if input.UserInputState==Enum.UserInputState.End then
+                dragging=false
             end
         end)
     end
 end)
 
-frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+fr.InputChanged:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then
+        dragInput=input
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input == dragInput then
-        update(input)
+u.InputChanged:Connect(function(input)
+    if dragging and input==dragInput then
+        local delta=input.Position-dragStart
+        fr.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
     end
 end)
 
--- Close button functionality
-closeButton.MouseButton1Click:Connect(function()
-    frame.Visible = false
+cb.MouseButton1Click:Connect(function()
+    fr.Visible=false
 end)
